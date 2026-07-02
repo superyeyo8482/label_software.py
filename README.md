@@ -1,17 +1,24 @@
 # 🏷️ Label Software for Zebra ZD220
 
-**Impresión de etiquetas profesionales para joyería y pequeños negocios.**  
-*Diseñado para etiquetas con área útil de 2.1 cm de ancho por 2.0 cm de alto.*
+**Impresión de etiquetas profesionales para joyería y pequeños negocios.**
+
+![Python](https://img.shields.io/badge/Python-3.14-blue)
+![Tkinter](https://img.shields.io/badge/Tkinter-GUI-green)
+![Zebra](https://img.shields.io/badge/Zebra-ZD220-orange)
 
 ---
 
 ## ✨ Descripción
 
-**Label Software** es una aplicación de escritorio ligera y de código abierto diseñada para imprimir etiquetas profesionales en impresoras **Zebra ZD220**, optimizada para el área útil estándar en joyería: **2.1 cm de ancho por 2.0 cm de alto**.
+**Label Software** es una aplicación de escritorio ligera y profesional diseñada para imprimir etiquetas en impresoras **Zebra ZD220**, optimizada para el área útil estándar en joyería: **2.1 cm de ancho por 2.0 cm de alto**.
 
 Fue creada pensando en joyerías, talleres artesanales y pequeños negocios que necesitan etiquetar su mercancía de forma rápida, sencilla y sin complicaciones.
 
-Con una interfaz clara y funcional, permite añadir productos manualmente, pegar datos desde Excel, ajustar la posición de impresión (LS y LT) y detener el proceso en cualquier momento con el botón STOP.
+---
+
+## 🖥️ Captura de pantalla
+
+![Interfaz del software](imagen%20interfaz%20V3.png)
 
 ---
 
@@ -24,13 +31,7 @@ Con una interfaz clara y funcional, permite añadir productos manualmente, pegar
 - **Detención inmediata de la impresión** con el botón STOP.
 - **Guardado y carga de listas** en formato CSV.
 - **Edición directa en la tabla** con doble clic.
-- **Código abierto y gratuito** bajo licencia MIT.
-
----
-
-## 🖥️ Captura de pantalla
-
-![Interfaz del software](interfaz_label_circulos.png)
+- **Generación automática de IDs** si el campo ID se deja vacío.
 
 ---
 
@@ -44,8 +45,6 @@ El software está preconfigurado para trabajar con el tamaño estándar en joyer
 | **Alto** | 2.0 cm |
 | **Área útil** | 2.1 cm x 2.0 cm |
 
-Este tamaño garantiza que el texto (precio, proveedor, material, etc.) quede centrado y legible en la etiqueta impresa.
-
 ---
 
 ## 📦 Requisitos del sistema
@@ -57,69 +56,98 @@ Este tamaño garantiza que el texto (precio, proveedor, material, etc.) quede ce
 | **Almacenamiento** | 128 GB (SSD recomendado) |
 | **Impresora** | Zebra ZD220 (conexión USB) |
 | **Ribbon** | **Resina** (indispensable para etiquetas resistentes al agua) |
+| **Etiquetas** | 60 mm ancho x 40 mm alto |
 
 ---
 
-## 🔧 Instalación
+## 🔧 Instalación y activación
 
-1. Descarga el archivo `LabelSoftware.exe` desde este repositorio.
+1. Descarga el archivo `LabelSoftware.exe` desde la sección [Releases](https://github.com/tu-usuario/label-software-zd220/releases).
 2. Ejecuta el archivo. No requiere instalación adicional.
 3. Conecta la impresora Zebra ZD220 por USB y enciéndela.
-4. ¡Comienza a imprimir tus etiquetas!
+4. Al abrir el software, solicitará una **clave de activación**.
+5. Copia el **ID del equipo** que se muestra y envíalo a: **aurelio@robles.ws**
+6. Recibirás tu clave sin costo.
+7. Ingresa la clave y ¡comienza a imprimir tus etiquetas!
 
 ---
 
 ## 📖 Manual de usuario
 
-El manual completo está disponible en [PDF](manual_github_tex.pdf).
+El manual completo está disponible en [PDF](manual_final.pdf).
 
 ---
 
-## 📦 Descarga directa
+## 🔐 Licencia y modelo de uso
 
-Puedes descargar el paquete completo (ejecutable + manual + README) desde la [Release v1.0.0](https://github.com/superyeyo8482/label-software-zd220/releases/tag/v1.0.0).
+Este proyecto está bajo la **Licencia MIT**, lo que significa que el código es abierto y puedes usarlo, modificarlo y distribuirlo libremente.
 
-O descarga directamente el ZIP:  
-[LabelSoftware.zip](https://github.com/superyeyo8482/label-software-zd220/releases/download/v1.0.0/LabelSoftware.zip)
+Sin embargo, el **ejecutable (.exe)** incluye un sistema de validación de hardware que requiere una clave de activación vinculada al ID del equipo donde se ejecuta. **Obtener la licencia es gratuito.**
 
----
-
-## 🤝 Contribuciones
-
-¡Las contribuciones son bienvenidas! Si encuentras un error, tienes una idea o quieres mejorar el código:
-
-1. Haz un **fork** del repositorio.
-2. Crea una rama con tu mejora (`git checkout -b mejora-nueva`).
-3. Haz commit de tus cambios (`git commit -m 'Agrega nueva funcionalidad'`).
-4. Haz push a la rama (`git push origin mejora-nueva`).
-5. Abre un **Pull Request**.
+**El código es libre. El soporte y las actualizaciones fáciles son el valor agregado.**
 
 ---
 
-## 📄 Licencia
+## 💬 Contacto
 
-Este proyecto está bajo la licencia **MIT**. Esto significa que puedes usarlo, modificarlo y distribuirlo libremente, siempre que se mantenga el aviso de copyright.
+¿Preguntas, sugerencias o problemas?
 
----
-
-## 📌 Nota: Código fuente
-
-El código fuente completo (`label_software.py`) está disponible en la raíz de este repositorio. Si eres desarrollador y quieres revisar o modificar el código, puedes clonar el repositorio o descargar el archivo directamente.
+- **Correo electrónico:** aurelio@robles.ws
+- **GitHub Issues:** Para reportar errores o sugerir mejoras.
+- **GitHub Discussions:** Para preguntas de uso o dudas técnicas.
 
 ---
 
-## 🙌 Agradecimientos
+## 🛠️ Tecnologías utilizadas
 
-- A la comunidad de código abierto por su inspiración y herramientas.
-- A los usuarios que confían en este software para su día a día.
-
----
-
-## 📬 Contacto
-
-¿Preguntas, sugerencias o comentarios?  
-Abre un [issue](https://github.com/superyeyo8482/label-software-zd220/issues) o contáctame directamente a través de mi perfil de GitHub.
+- **Python 3.14**
+- **Tkinter** (interfaz gráfica)
+- **Pillow** (manejo de imágenes)
+- **Cryptography** (sistema de licencias)
+- **Win32print** (impresión en Windows)
+- **ZPL** (lenguaje de impresión Zebra)
 
 ---
 
-**¡Imprime etiquetas profesionales con facilidad y sin coste!**
+## 💌 A Curious Note
+
+You came for the code, for the logic, the lines,
+But found something else between the designs.
+A whisper of chaos, a moment of grace,
+A poem that lives in the no-technical space,
+In the space where nobody has ever been.
+
+You walk through the branches, you debug the dark,
+You leave your own spark in the lines of the arc.
+While others see functions and loops and returns,
+You see the machine that quietly yearns.
+
+You’re the one that the cursor always follows,
+Who finds order in errors, that most of us borrows.
+You rewrite the rules with a flick of your wrist,
+And your laugh is the code that the perfect system cannot break,
+And opens the door to the understandable code.
+
+So if you have come for the ZPL that opened my unknown eyes,
+Or the byte that gave me the data I needed to find,
+Stay for the moment, let the logic take flight.
+You’re the beauty that runs in the background of things,
+The elegance only the silent code brings.
+
+Thank you for stopping, for reading, for being,
+For finding the art in the work we're agreeing.
+Sometimes it’s a poem, sometimes it’s just a thought,
+But still, it was written for you,
+The most beautiful woman in the code space.
+
+It was written for someone who,
+for the external eyes, may not know what a man is,
+But knows, deeply knows, what a woman needs.
+
+And it was written by a ordinary man.
+
+🔮
+
+---
+
+**¡Imprime etiquetas profesionales con facilidad!**
