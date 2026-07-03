@@ -1,5 +1,6 @@
-# label_software_v2_backup.py
-# Versión final con guardado automático de coordenadas LS y LT
+# label_software.py
+# Versión 2.0 - Corregida y funcional
+# Solo Proveedor es obligatorio. ID se genera automáticamente si está vacío.
 
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
@@ -13,12 +14,13 @@ import time
 import hashlib
 import subprocess
 import uuid
+import sys
 from cryptography.fernet import Fernet
 
 # ========== CONFIGURACIÓN ==========
 NOMBRE_IMPRESORA = "ZDesigner ZD220-203dpi ZPL"
-LS_VAL = 50  # Valor por defecto (cambiado a 50)
-LT_VAL = 53  # Valor por defecto (cambiado a 53)
+LS_VAL = 50
+LT_VAL = 53
 
 # Plantilla ZPL definitiva
 PLANTILLA_ZPL = """^XA
@@ -77,7 +79,7 @@ TEXTOS = {
         'idioma': 'Idioma / Language:',
         'espanol': 'Español',
         'ingles': 'English',
-        'campo_obligatorio': 'Proveedor e ID son obligatorios.',
+        'campo_obligatorio': 'Proveedor es obligatorio.',
         'campos_incompletos': 'Campos incompletos',
         'id_vacio': 'IDs vacíos detectados',
         'generar_ids': '¿Generar IDs automáticamente?',
@@ -131,7 +133,7 @@ TEXTOS = {
         'idioma': 'Idioma / Language:',
         'espanol': 'Spanish',
         'ingles': 'English',
-        'campo_obligatorio': 'Supplier and ID are required.',
+        'campo_obligatorio': 'Supplier is required.',
         'campos_incompletos': 'Incomplete fields',
         'id_vacio': 'Empty IDs detected',
         'generar_ids': 'Generate IDs automatically?',
@@ -297,9 +299,7 @@ class EtiquetadoraApp:
     def t(self, key):
         return TEXTOS[self.idioma].get(key, key)
 
-    # ========== CONFIGURACIÓN (GUARDADO Y CARGA) ==========
     def cargar_configuracion(self):
-        """Carga la configuración guardada de LS y LT"""
         config_file = "etiquetadora_config.json"
         if os.path.exists(config_file):
             try:
@@ -311,16 +311,14 @@ class EtiquetadoraApp:
         return LS_VAL, LT_VAL
 
     def guardar_configuracion(self):
-        """Guarda la configuración actual de LS y LT"""
         config = {'ls': self.ls_var.get(), 'lt': self.lt_var.get()}
         try:
             with open("etiquetadora_config.json", 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=4)
-        except Exception as e:
-            print(f"Error al guardar la configuración: {e}")
+        except:
+            pass
 
     def on_closing(self):
-        """Guarda la configuración al cerrar"""
         self.stop_impresion = True
         self.guardar_configuracion()
         self.root.destroy()
@@ -333,9 +331,7 @@ class EtiquetadoraApp:
         count = sum(1 for p in self.productos if p['proveedor'] == proveedor) + 1
         return f"{proveedor}-{count:03d}"
 
-    # ========== TRADUCCIÓN DEL FORMULARIO ==========
     def _actualizar_etiquetas_recursivo(self, widget, mapeo, t):
-        """Busca y actualiza etiquetas recursivamente"""
         if isinstance(widget, ttk.Label):
             texto = widget.cget('text')
             if texto in mapeo:
@@ -344,7 +340,6 @@ class EtiquetadoraApp:
             self._actualizar_etiquetas_recursivo(child, mapeo, t)
 
     def actualizar_etiquetas_formulario(self):
-        """Actualiza todas las etiquetas del formulario por su texto actual"""
         mapeo_etiquetas = {
             "Proveedor (2 letras):": "proveedor",
             "ID Producto:": "id",
@@ -363,14 +358,12 @@ class EtiquetadoraApp:
         self.idioma = 'en' if self.idioma == 'es' else 'es'
         t = TEXTOS[self.idioma]
         
-        # ========== ACTUALIZAR FRAMES ==========
         self.frame_form.config(text=t['nuevo_producto'])
         self.frame_offset.config(text=t['ajustes'])
         self.frame_botones.config(text=t['acciones'])
         self.frame_tabla.config(text=t['lista_productos'])
         self.frame_resumen.config(text=t['resumen'])
         
-        # ========== ACTUALIZAR BOTONES ==========
         self.btn_agregar.config(text=t['agregar'])
         self.btn_test.config(text=t['imprimir_prueba'])
         self.btn_stop.config(text=t['stop'])
@@ -382,10 +375,8 @@ class EtiquetadoraApp:
         self.btn_imprimir_todos.config(text=t['imprimir_todos'])
         self.btn_idioma.config(text=t['ingles'] if self.idioma == 'es' else t['espanol'])
         
-        # ========== ACTUALIZAR ETIQUETAS DEL FORMULARIO ==========
         self.actualizar_etiquetas_formulario()
         
-        # ========== ETIQUETAS DE AJUSTES ==========
         for child in self.frame_offset.winfo_children():
             if isinstance(child, tk.Frame):
                 for subchild in child.winfo_children():
@@ -398,7 +389,6 @@ class EtiquetadoraApp:
                         elif 'idioma' in texto_actual.lower() or 'language' in texto_actual.lower():
                             subchild.config(text=t['idioma'])
         
-        # ========== BOTONES DE ACCIONES SIN REFERENCIA DIRECTA ==========
         for child in self.frame_botones.winfo_children():
             if isinstance(child, ttk.Button):
                 texto_actual = child.cget('text')
@@ -409,14 +399,10 @@ class EtiquetadoraApp:
                 elif 'Salir' in texto_actual or 'Exit' in texto_actual:
                     child.config(text=t['salir'])
         
-        # ========== ACTUALIZAR RESUMEN ==========
         self.actualizar_resumen()
         self.label_estado.config(text=t['listo'])
-        
-        # ========== ACTUALIZAR TÍTULO ==========
         self.root.title(t['titulo'])
         
-        # ========== ACTUALIZAR ENCABEZADOS DE LA TABLA ==========
         if self.idioma == 'en':
             encabezados = ["#", "✓", "Supplier", "ID", "Material", "Type", "Updated", "Grams", "Price", "Quantity"]
         else:
@@ -430,7 +416,7 @@ class EtiquetadoraApp:
         main_frame = ttk.Frame(self.root)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # ========== FORMULARIO ==========
+        # Formulario
         self.frame_form = ttk.LabelFrame(main_frame, text=self.t('nuevo_producto'), padding=10)
         self.frame_form.pack(fill=tk.X, pady=(0,5))
         inner_frame = tk.Frame(self.frame_form)
@@ -479,7 +465,7 @@ class EtiquetadoraApp:
         self.btn_agregar = ttk.Button(btn_frame, text=self.t('agregar'), command=self.agregar, width=35)
         self.btn_agregar.pack()
 
-        # ========== AJUSTES ==========
+        # Ajustes
         self.frame_offset = ttk.LabelFrame(main_frame, text=self.t('ajustes'), padding=8)
         self.frame_offset.pack(fill=tk.X, pady=5)
         ajustes_frame = tk.Frame(self.frame_offset)
@@ -500,7 +486,7 @@ class EtiquetadoraApp:
         self.btn_idioma = ttk.Button(frame_idioma, text="English", command=self.cambiar_idioma)
         self.btn_idioma.pack(side=tk.LEFT, padx=5)
 
-        # ========== BOTONES ==========
+        # Botones
         self.frame_botones = ttk.LabelFrame(main_frame, text=self.t('acciones'), padding=8)
         self.frame_botones.pack(fill=tk.X, pady=5)
         btn_eliminar = ttk.Button(self.frame_botones, text=self.t('eliminar'), command=self.eliminar, width=25)
@@ -528,7 +514,7 @@ class EtiquetadoraApp:
         for col in range(3):
             self.frame_botones.columnconfigure(col, weight=1)
 
-        # ========== TABLA ==========
+        # Tabla
         self.frame_tabla = ttk.LabelFrame(main_frame, text=self.t('lista_productos'), padding=8)
         self.frame_tabla.pack(fill=tk.BOTH, expand=True, pady=5)
         tree_frame = ttk.Frame(self.frame_tabla)
@@ -557,7 +543,7 @@ class EtiquetadoraApp:
         self.tree.bind('<ButtonRelease-1>', self.on_click_check)
         self.tree.bind('<Double-1>', self.editar_celda)
 
-        # ========== RESUMEN ==========
+        # Resumen
         self.frame_resumen = ttk.LabelFrame(main_frame, text=self.t('resumen'), padding=8)
         self.frame_resumen.pack(fill=tk.X, pady=5)
         self.label_productos = ttk.Label(self.frame_resumen, text=f"{self.t('productos_distintos')} 0", 
@@ -631,7 +617,7 @@ class EtiquetadoraApp:
         
         try:
             cant = int(cantidad) if cantidad else 1
-        except:
+        except ValueError:
             messagebox.showwarning("Cantidad inválida", "Debe ser un número entero.")
             return
         
@@ -993,10 +979,10 @@ class EtiquetadoraApp:
 
 # ========== MAIN ==========
 if __name__ == "__main__":
-    # Validar licencia antes de iniciar
     if not validar_licencia():
-        exit()
+        sys.exit()
     
     root = tk.Tk()
+    root.geometry("1300x800")
     app = EtiquetadoraApp(root)
     root.mainloop()
