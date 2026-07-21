@@ -1,153 +1,83 @@
-# 🏷️ Label Software for Zebra ZD220
+# Label Software (refactored)
 
-**Impresión de etiquetas profesionales para joyería y pequeños negocios.**
+Tkinter GUI for printing Zebra ZPL jewelry price labels: manual product
+entry, paste-from-Excel import, batch summary, per-machine license
+activation. This is a modular rewrite of `label_software_2.0.py`
+(the original file, kept untouched one directory up as reference).
 
-![Python](https://img.shields.io/badge/Python-3.14-blue)
-![Tkinter](https://img.shields.io/badge/Tkinter-GUI-green)
-![Zebra](https://img.shields.io/badge/Zebra-ZD220-orange)
+**Read `REFACTOR_NOTES.md` first.** `label_software_2.0.py` (the file this
+refactor started from) did not run at all — it failed to even parse as
+Python, and 11 methods the UI wires up to buttons didn't exist anywhere in
+it. A second file, `label_software_v2_backup.py`, later turned up and
+turned out to be the complete, working version those methods were missing
+from — see REFACTOR_NOTES.md "Stage 3" and "Stage 4" for exactly what was
+recovered vs. what came from that file vs. the one place (Excel-paste
+parsing) where the two disagreed and had to be reconciled.
 
----
+## Structure
 
-## ✨ Descripción
+| File | Responsibility |
+|---|---|
+| `config.py` | Printer name, print offsets, file paths, ZPL template, logging setup. No secrets. |
+| `i18n.py` | `TEXTOS` translation dict (es/en) + `t(idioma, key)` lookup. |
+| `licensing.py` | Machine ID, activation code validation, license file persistence. **Contains an explicit, unfixed security warning — read its docstring.** |
+| `printing.py` | ZPL rendering (`generar_zpl`), printer output behind a `PrinterBackend` interface, and `imprimir_lote` (threaded-batch-print orchestration, STOP-aware) — all testable without Windows/pywin32/a real printer. |
+| `models.py` | Product dicts, ID generation, batch summary math. |
+| `excel_paste.py` | Pure parsing of pasted Excel/Sheets clipboard text into product dicts — no clipboard/tkinter access, so it's independently testable. |
+| `csv_io.py` | Pure CSV row ↔ product dict conversion for Cargar/Guardar CSV — no file I/O, so it's independently testable. |
+| `gui.py` | `EtiquetadoraApp` (tkinter) and the activation dialog. Delegates everything above; this file should only contain widget wiring. |
+| `app.py` | Entry point: logging setup, license gate, `mainloop()`. |
+| `tests/` | Unit tests for everything above that doesn't need a display (see below). |
+| `stage1_recovered.py` | Intermediate single-file recovery step from before `label_software_v2_backup.py` was found — historical record only, not used by `app.py`. See REFACTOR_NOTES.md "Stage 3". |
 
-**Label Software** es una aplicación de escritorio ligera y profesional diseñada para imprimir etiquetas en impresoras **Zebra ZD220**, optimizada para el área útil estándar en joyería: **2.1 cm de ancho por 2.0 cm de alto**.
+## Running
 
-Fue creada pensando en joyerías, talleres artesanales y pequeños negocios que necesitan etiquetar su mercancía de forma rápida, sencilla y sin complicaciones.
+```
+cd label_software
+pip install -r requirements.txt
+python app.py
+```
 
----
+On first run on a new machine it will show the activation dialog (same
+flow as the original — copy the device ID, get a code from whoever issues
+them, paste it in).
 
-## 🖥️ Captura de pantalla
+## Testing
 
-![Interfaz del software](imagen%20interfaz%20V3.png)
+```
+cd label_software
+pip install -r requirements.txt
+python -m pytest tests/ -v
+```
 
----
+37 tests, all passing, covering ZPL generation, batch-print orchestration
+(STOP mid-batch, first-failure aborts the batch), license code validation
+(including a test that demonstrates the license-key vulnerability itself,
+so it can't silently regress into something worse), batch summary math,
+CSV row conversion, and Excel-paste parsing edge cases (missing columns,
+price/gram cleanup, missing-provider rows, missing-id handling). None of
+this requires a display or Windows — `printing.py`'s Windows-only code
+path is behind `PrinterBackend` and is never exercised by the test suite.
 
-## 🚀 Características principales
+Also manually smoke-tested end to end on macOS with `win32print` stubbed
+out: launched the real GUI, added a product through the form (auto-ID
+generation), duplicated a row, toggled the language button (verified the
+window title and labels actually change), and generated ZPL from live
+app state.
 
-- **Interfaz gráfica intuitiva** (basada en `tkinter`).
-- **Agregado rápido de productos** con validación de campos.
-- **Pegado directo desde Excel / Google Sheets / LibreOffice**.
-- **Ajuste de posición de impresión** (LS y LT) para centrar el texto en el área útil.
-- **Detención inmediata de la impresión** con el botón STOP.
-- **Guardado y carga de listas** en formato CSV.
-- **Edición directa en la tabla** con doble clic.
-- **Generación automática de IDs** si el campo ID se deja vacío.
+## Known limitations (carried over from the source, not introduced here)
 
----
-
-## 📐 Área útil de la etiqueta
-
-El software está preconfigurado para trabajar con el tamaño estándar en joyería:
-
-| Medida | Valor |
-|--------|-------|
-| **Ancho** | 2.1 cm |
-| **Alto** | 2.0 cm |
-| **Área útil** | 2.1 cm x 2.0 cm |
-
----
-
-## 📦 Requisitos del sistema
-
-| Componente | Mínimo requerido |
-|------------|------------------|
-| **Sistema operativo** | Windows 10 / 11 (64 bits) |
-| **Memoria RAM** | 4 GB |
-| **Almacenamiento** | 128 GB (SSD recomendado) |
-| **Impresora** | Zebra ZD220 (conexión USB) |
-| **Ribbon** | **Resina** (indispensable para etiquetas resistentes al agua) |
-| **Etiquetas** | 60 mm ancho x 40 mm alto |
-
----
-
-## 🔧 Instalación y activación
-
-1. Descarga el archivo `LabelSoftware.exe` desde la sección [Releases](https://github.com/tu-usuario/label-software-zd220/releases).
-2. Ejecuta el archivo. No requiere instalación adicional.
-3. Conecta la impresora Zebra ZD220 por USB y enciéndela.
-4. Al abrir el software, solicitará una **clave de activación**.
-5. Copia el **ID del equipo** que se muestra y envíalo a: **aurelio@robles.ws**
-6. Recibirás tu clave sin costo.
-7. Ingresa la clave y ¡comienza a imprimir tus etiquetas!
-
----
-
-## 📖 Manual de usuario
-
-El manual completo está disponible en [PDF](manual_final.pdf).
-
----
-
-## 🔐 Licencia y modelo de uso
-
-Este proyecto está bajo la **Licencia MIT**, lo que significa que el código es abierto y puedes usarlo, modificarlo y distribuirlo libremente.
-
-Sin embargo, el **ejecutable (.exe)** incluye un sistema de validación de hardware que requiere una clave de activación vinculada al ID del equipo donde se ejecuta. **Obtener la licencia es gratuito.**
-
-**El código es libre. El soporte y las actualizaciones fáciles son el valor agregado.**
-
----
-
-## 💬 Contacto
-
-¿Preguntas, sugerencias o problemas?
-
-- **Correo electrónico:** aurelio@robles.ws
-- **GitHub Issues:** Para reportar errores o sugerir mejoras.
-- **GitHub Discussions:** Para preguntas de uso o dudas técnicas.
-
----
-
-## 🛠️ Tecnologías utilizadas
-
-- **Python 3.14**
-- **Tkinter** (interfaz gráfica)
-- **Pillow** (manejo de imágenes)
-- **Cryptography** (sistema de licencias)
-- **Win32print** (impresión en Windows)
-- **ZPL** (lenguaje de impresión Zebra)
-
----
-
-## 💌 A Curious Note
-
-You came for the code, for the logic, the lines,
-But found something else between the designs.
-A whisper of chaos, a moment of grace,
-A poem that lives in the no-technical space,
-In the space where nobody has ever been.
-
-You walk through the branches, you debug the dark,
-You leave your own spark in the lines of the arc.
-While others see functions and loops and returns,
-You see the machine that quietly yearns.
-
-You’re the one that the cursor always follows,
-Who finds order in errors, that most of us borrows.
-You rewrite the rules with a flick of your wrist,
-And your laugh is the code that the perfect system cannot break,
-And opens the door to the understandable code.
-
-So if you have come for the ZPL that opened my unknown eyes,
-Or the byte that gave me the data I needed to find,
-Stay for the moment, let the logic take flight.
-You’re the beauty that runs in the background of things,
-The elegance only the silent code brings.
-
-Thank you for stopping, for reading, for being,
-For finding the art in the work we're agreeing.
-Sometimes it’s a poem, sometimes it’s just a thought,
-But still, it was written for you,
-The most beautiful woman in the code space.
-
-It was written for someone who,
-for the external eyes, may not know what a man is,
-But knows, deeply knows, what a woman needs.
-
-And it was written by a ordinary man.
-
-🔮
-
----
-
-**¡Imprime etiquetas profesionales con facilidad!**
+- **License key is insecure by construction.** See `licensing.py`'s module
+  docstring and `REFACTOR_NOTES.md` §5. Not fixed — flagged for you to
+  decide on (asymmetric signing vs. server-side check).
+- **Excel-paste requirements and field-cleaning were merged from two
+  disagreeing source files** (only `proveedor` required, from the
+  confirmed-working backup; comma-separator/unit-word/non-breaking-space
+  handling, from the other file's more defensive fragment). See
+  `REFACTOR_NOTES.md` "Stage 4" if your real supplier data suggests a
+  different call should've been made here — the two halves are
+  independent and easy to change separately.
+- **The window title is only ever set inside `cambiar_idioma`.** Preserved
+  as-is from the source rather than "fixed" by also setting it at
+  startup — it's a real, if odd, existing behavior (the window keeps its
+  default Tk title until the language button is clicked once).

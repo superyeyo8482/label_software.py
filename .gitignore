@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+etiquetadora_config.json
+license.key
+label_software.log
